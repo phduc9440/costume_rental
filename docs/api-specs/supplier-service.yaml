@@ -1,0 +1,410 @@
+# ============================================
+# Supplier Service — OpenAPI 3.0 Specification
+# ============================================
+openapi: 3.0.3
+info:
+  title: Supplier Service API
+  description: |
+    API quản lý nhà cung cấp và lịch sử nhập hàng cho hệ thống.
+    Bao gồm: CRUD nhà cung cấp, tạo phiếu nhập kho, thống kê nhập hàng.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/supplier
+    description: Via API Gateway
+  - url: http://localhost:5003  # Assuming it runs on 5003 or similar
+    description: Direct access (development)
+
+paths:
+  # ─── Supplier Management ────────────────────
+  /suppliers:
+    post:
+      tags: [Supplier]
+      summary: Tạo nhà cung cấp mới
+      operationId: createSupplier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierCreationRequest'
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseSupplierResponse'
+
+    get:
+      tags: [Supplier]
+      summary: Lấy danh sách nhà cung cấp (phân trang)
+      operationId: getSuppliers
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageSupplierResponse'
+
+  /suppliers/{id}:
+    get:
+      tags: [Supplier]
+      summary: Lấy thông tin nhà cung cấp theo ID
+      operationId: getSupplierById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseSupplierResponse'
+
+    put:
+      tags: [Supplier]
+      summary: Cập nhật thông tin nhà cung cấp
+      operationId: updateSupplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseSupplierResponse'
+
+    delete:
+      tags: [Supplier]
+      summary: Xóa nhà cung cấp
+      operationId: deleteSupplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  # ─── Import Invoices Management ─────────────
+  /import-invoices:
+    post:
+      tags: [Import Invoice]
+      summary: Tạo hóa đơn nhập hàng
+      operationId: createImportInvoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportInvoiceCreationRequest'
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseImportInvoiceResponse'
+
+    get:
+      tags: [Import Invoice]
+      summary: Lấy danh sách hóa đơn nhập hàng (phân trang)
+      operationId: getImportInvoices
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageImportInvoiceResponse'
+
+  /import-invoices/{id}:
+    get:
+      tags: [Import Invoice]
+      summary: Lấy thông tin hóa đơn nhập theo ID
+      operationId: getImportInvoiceById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseImportInvoiceResponse'
+
+  /import-invoices/statistics/top-importers:
+    get:
+      tags: [Statistics]
+      summary: Thống kê top nhà cung cấp
+      operationId: getTopSuppliers
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseTopSupplierResponseList'
+
+# ─── Components ─────────────────────────────
+components:
+  schemas:
+
+    # ── Request DTOs ──
+    SupplierCreationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: "Nhà Cung Cấp ABC"
+        address:
+          type: string
+          example: "123 Đường XYZ"
+        phone:
+          type: string
+          example: "0901234567"
+
+    SupplierUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+
+    ImportDetailRequest:
+      type: object
+      properties:
+        costumeId:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+          format: double
+
+    ImportInvoiceCreationRequest:
+      type: object
+      properties:
+        supplierId:
+          type: string
+        employeeId:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportDetailRequest'
+
+    # ── Response DTOs ──
+    SupplierResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+
+    ImportDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        costumeId:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+          format: double
+
+    ImportInvoiceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        supplier:
+          $ref: '#/components/schemas/SupplierResponse'
+        employeeId:
+          type: string
+        importDate:
+          type: string
+          format: date-time
+        totalAmount:
+          type: number
+          format: double
+        importDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportDetailResponse'
+
+    TopSupplierResponse:
+      type: object
+      properties:
+        supplier:
+          $ref: '#/components/schemas/SupplierResponse'
+        totalImportAmount:
+          type: number
+          format: double
+        totalImportInvoiceCount:
+          type: integer
+          format: int64
+
+    # ── Page Response ──
+    PageResponse:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        pageSize:
+          type: integer
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 45
+
+    # ── Wrapped Responses ──
+    ApiResponseSupplierResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/SupplierResponse'
+
+    ApiResponsePageSupplierResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageResponse'
+            - type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SupplierResponse'
+
+    ApiResponseImportInvoiceResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/ImportInvoiceResponse'
+
+    ApiResponsePageImportInvoiceResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageResponse'
+            - type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ImportInvoiceResponse'
+
+    ApiResponseTopSupplierResponseList:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/TopSupplierResponse'
+
+    ApiResponseVoid:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string

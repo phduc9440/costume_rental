@@ -1,0 +1,515 @@
+# ============================================
+# Return Service — OpenAPI 3.0 Specification
+# ============================================
+openapi: 3.0.3
+info:
+  title: Return Service API
+  description: |
+    API quản lý trả trang phục và xử lý lỗi/phạt.
+    Bao gồm: trả đồ, tính phí lỗi, thống kê doanh thu trả đồ.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/return
+    description: Via API Gateway
+  - url: http://localhost:5004  # Assuming it runs on 5004 or similar
+    description: Direct access (development)
+
+paths:
+  # ─── Return Management ──────────────────────
+  /returns:
+    post:
+      tags: [Return]
+      summary: Xử lý trả trang phục
+      operationId: createReturnTicket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnRequest'
+      responses:
+        '201':
+          description: Trả đồ thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseReturnResponse'
+        '400':
+          description: Dữ liệu không hợp lệ hoặc thiếu thông tin
+
+    get:
+      tags: [Return]
+      summary: Lấy danh sách phiếu trả (phân trang)
+      operationId: getAllReturnTickets
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageReturnResponse'
+
+  /returns/{id}:
+    get:
+      tags: [Return]
+      summary: Lấy thông tin phiếu trả theo ID
+      operationId: getReturnTicketById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseReturnResponse'
+        '404':
+          description: Không tìm thấy phiếu trả
+
+  /returns/statistics/revenue:
+    get:
+      tags: [Return Statistics]
+      summary: Thống kê tổng doanh thu trả đồ (theo tháng/năm)
+      operationId: getRevenueStatistics
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: Loại thống kê (ví dụ: MONTH, YEAR)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRevenueStatisticResponseList'
+
+  /returns/statistics/revenue/details:
+    get:
+      tags: [Return Statistics]
+      summary: Xem chi tiết hóa đơn theo kỳ thống kê
+      operationId: getRevenueDetails
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseReturnInvoiceDetailResponseList'
+
+
+  # ─── Error/Penalty Management (Loi) ────────
+  /errors:
+    post:
+      tags: [Penalty]
+      summary: Tạo loại lỗi/phạt mới
+      operationId: createLoi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoiRequest'
+      responses:
+        '201':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseLoiResponse'
+
+    get:
+      tags: [Penalty]
+      summary: Lấy danh sách các lỗi cấu hình
+      operationId: getAllLoi
+      parameters:
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageLoiResponse'
+
+  /errors/{id}:
+    get:
+      tags: [Penalty]
+      summary: Lấy thông tin lỗi theo ID
+      operationId: getLoiById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseLoiResponse'
+
+    put:
+      tags: [Penalty]
+      summary: Cập nhật lỗi
+      operationId: updateLoi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoiRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseLoiResponse'
+
+    delete:
+      tags: [Penalty]
+      summary: Xóa lỗi
+      operationId: deleteLoi
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+# ─── Components ─────────────────────────────
+components:
+  schemas:
+
+    # ── Request DTOs ──
+    ReturnErrorDetailRequest:
+      type: object
+      properties:
+        loiId:
+          type: string
+        tongLoi:
+          type: integer
+
+    ReturnDetailRequest:
+      type: object
+      properties:
+        trangPhucId:
+          type: string
+        soLuong:
+          type: integer
+        chiTietLois:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnErrorDetailRequest'
+
+    ReturnRequest:
+      type: object
+      required:
+        - phieuThueId
+      properties:
+        phieuThueId:
+          type: string
+        nhanVienId:
+          type: string
+        chiTietTras:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnDetailRequest'
+
+    LoiRequest:
+      type: object
+      required:
+        - tenLoi
+      properties:
+        tenLoi:
+          type: string
+        mucPhat:
+          type: number
+          format: float
+        moTa:
+          type: string
+
+    # ── Response DTOs ──
+    LoiResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tenLoi:
+          type: string
+        mucPhat:
+          type: number
+          format: float
+        moTa:
+          type: string
+
+    ReturnErrorDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tongLoi:
+          type: integer
+        loi:
+          $ref: '#/components/schemas/LoiResponse'
+
+    CostumeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+
+    ReturnDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        soLuong:
+          type: integer
+        trangPhucId:
+          type: string
+        costume:
+          $ref: '#/components/schemas/CostumeResponse'
+        chiTietLois:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnErrorDetailResponse'
+
+    CustomerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+
+    EmployeeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        position:
+          type: string
+
+    ReturnResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        ngayLap:
+          type: string
+          format: date-time
+        nhanVienId:
+          type: string
+        phieuThueId:
+          type: string
+        customer:
+          $ref: '#/components/schemas/CustomerResponse'
+        employee:
+          $ref: '#/components/schemas/EmployeeResponse'
+        chiTietTras:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnDetailResponse'
+
+    RevenueStatisticResponse:
+      type: object
+      properties:
+        period:
+          type: string
+        totalRevenue:
+          type: number
+          format: double
+
+    ReturnInvoiceDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        customerName:
+          type: string
+        borrowDate:
+          type: string
+          format: date-time
+        returnDate:
+          type: string
+          format: date-time
+        totalItems:
+          type: integer
+        totalAmount:
+          type: number
+          format: double
+
+    PageResponse:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+        totalPages:
+          type: integer
+        pageSize:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+
+    # ── Wrapped Responses ──
+    ApiResponseReturnResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/ReturnResponse'
+
+    ApiResponsePageReturnResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageResponse'
+            - type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ReturnResponse'
+
+    ApiResponseLoiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        result:
+          $ref: '#/components/schemas/LoiResponse'
+
+    ApiResponsePageLoiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageResponse'
+            - type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/LoiResponse'
+
+    ApiResponseRevenueStatisticResponseList:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevenueStatisticResponse'
+
+    ApiResponseReturnInvoiceDetailResponseList:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReturnInvoiceDetailResponse'
+
+    ApiResponseVoid:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string

@@ -1,0 +1,754 @@
+# ============================================
+# Customer Service — OpenAPI 3.0 Specification
+# ============================================
+openapi: 3.0.3
+info:
+  title: Customer Service API
+  description: |
+    API quản lý khách hàng và xác thực cho hệ thống cho thuê trang phục.
+    Bao gồm: đăng ký, đăng nhập, CRUD khách hàng, tìm theo SĐT.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/member
+    description: Via API Gateway
+  - url: http://localhost:5001
+    description: Direct access (development)
+
+paths:
+  # ─── Authentication ─────────────────────────
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Đăng nhập
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequest'
+      responses:
+        '200':
+          description: Đăng nhập thành công, trả về JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseAuthenticationResponse'
+        '401':
+          description: Sai username (1101) hoặc password (1104)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+        '400':
+          description: Dữ liệu đầu vào không hợp lệ (1102, 1103)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Đăng ký tài khoản khách hàng
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreationRequest'
+      responses:
+        '200':
+          description: Đăng ký thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerResponse'
+        '400':
+          description: Username đã tồn tại (1100) hoặc validation lỗi (1102, 1103)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  # ─── Customer Management ────────────────────
+  /customers:
+    get:
+      tags: [Customer]
+      summary: Lấy danh sách tất cả khách hàng
+      operationId: getAllCustomers
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Danh sách khách hàng có phân trang
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageCustomerResponse'
+
+  /customers/{id}:
+    get:
+      tags: [Customer]
+      summary: Lấy thông tin khách hàng theo ID
+      operationId: getCustomerById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Thông tin khách hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerResponse'
+        '404':
+          description: Không tìm thấy khách hàng (1101)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+    put:
+      tags: [Customer]
+      summary: Cập nhật thông tin khách hàng
+      operationId: updateCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerResponse'
+        '404':
+          description: Không tìm thấy khách hàng (1101)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+    delete:
+      tags: [Customer]
+      summary: Xóa khách hàng
+      operationId: deleteCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+        '404':
+          description: Không tìm thấy khách hàng (1101)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /customers/phone/{phone}:
+    get:
+      tags: [Customer]
+      summary: Tìm khách hàng theo số điện thoại
+      operationId: getCustomerByPhone
+      parameters:
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "0901234567"
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Danh sách khách hàng theo SĐT (phân trang)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageCustomerResponse'
+        '404':
+          description: Không tìm thấy khách hàng với SĐT này (1101)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /customers/my-profile:
+    get:
+      tags: [Customer]
+      summary: Lấy thông tin cá nhân (dành cho người dùng đăng nhập)
+      operationId: getMyProfile
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Thông tin cá nhân
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerResponse'
+    put:
+      tags: [Customer]
+      summary: Cập nhật thông tin cá nhân
+      operationId: updateMyProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerResponse'
+
+  /customers/statistics/revenue:
+    get:
+      tags: [Customer]
+      summary: Thống kê doanh thu theo khách hàng
+      operationId: getCustomerRevenueStats
+      responses:
+        '200':
+          description: Danh sách thống kê doanh thu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerStatResponseList'
+
+  # ─── Employee Management ────────────────────
+  /employees:
+    post:
+      tags: [Employee]
+      summary: Tạo nhân viên mới
+      operationId: createEmployee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreationRequest'
+      responses:
+        '200':
+          description: Tạo thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployeeResponse'
+
+    get:
+      tags: [Employee]
+      summary: Lấy danh sách tất cả nhân viên
+      operationId: getAllEmployees
+      responses:
+        '200':
+          description: Danh sách nhân viên
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployeeList'
+
+  /employees/{id}:
+    get:
+      tags: [Employee]
+      summary: Lấy thông tin nhân viên theo ID
+      operationId: getEmployeeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thông tin nhân viên
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployeeResponse'
+        '404':
+          description: Không tìm thấy nhân viên
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+    put:
+      tags: [Employee]
+      summary: Cập nhật thông tin nhân viên
+      operationId: updateEmployee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseEmployeeResponse'
+
+    delete:
+      tags: [Employee]
+      summary: Xóa nhân viên
+      operationId: deleteEmployee
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xóa thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseVoid'
+
+  # ─── Health Check ───────────────────────────
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+# ─── Components ─────────────────────────────
+components:
+  schemas:
+
+    # ── Request DTOs ──
+    AuthenticationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "nguyenvana"
+        password:
+          type: string
+          example: "123456"
+
+    CustomerCreationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          example: "nguyenvana"
+        password:
+          type: string
+          minLength: 6
+          example: "123456"
+        name:
+          type: string
+          example: "Nguyễn Văn A"
+        phone:
+          type: string
+          example: "0901234567"
+        address:
+          type: string
+          example: "123 Nguyễn Huệ, Q.1, TP.HCM"
+        email:
+          type: string
+          format: email
+          example: "nguyenvana@email.com"
+
+    CustomerUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Nguyễn Văn B"
+        phone:
+          type: string
+          example: "0909876543"
+        address:
+          type: string
+          example: "456 Lê Lợi, Q.3, TP.HCM"
+        email:
+          type: string
+          format: email
+          example: "nguyenvanb@email.com"
+
+    EmployeeCreationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          example: "nv_ban"
+        password:
+          type: string
+          minLength: 6
+          example: "123456"
+        position:
+          type: string
+          example: "Nhân viên kho"
+
+    EmployeeUpdateRequest:
+      type: object
+      properties:
+        position:
+          type: string
+          example: "Quản lý kho"
+
+    # ── Response DTOs ──
+    AuthenticationResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzUxMiJ9..."
+        authenticated:
+          type: boolean
+          example: true
+
+    CustomerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        username:
+          type: string
+          example: "nguyenvana"
+        role:
+          type: string
+          example: "CUSTOMER"
+        name:
+          type: string
+          example: "Nguyễn Văn A"
+        phone:
+          type: string
+          example: "0901234567"
+        address:
+          type: string
+          example: "123 Nguyễn Huệ, Q.1, TP.HCM"
+        email:
+          type: string
+          example: "nguyenvana@email.com"
+        totalSpent:
+          type: number
+          format: double
+          description: Tổng số tiền khách hàng đã thanh toán (dành cho Admin/Profile)
+          example: 1250000.0
+        rentalHistory:
+          description: Lịch sử thuê đồ của khách hàng (dành cho Admin/Profile)
+          $ref: '#/components/schemas/PageRentalOrderResponse'
+
+    EmployeeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        username:
+          type: string
+          example: "nv_ban"
+        role:
+          type: string
+          example: "EMPLOYEE"
+        position:
+          type: string
+          example: "Nhân viên kho"
+
+    CustomerStatResponse:
+      allOf:
+        - $ref: '#/components/schemas/CustomerResponse'
+        - type: object
+          properties:
+            totalRevenue:
+              type: number
+              format: float
+              example: 1500000.0
+
+    # ── Rental Related Schemas (Copied for Profile/Admin views) ──
+    RentalOrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "order-123"
+        deposit:
+          type: number
+          format: float
+        totalAmount:
+          type: number
+          format: float
+        createDate:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, DEPOSIT_PAID, RENTING, CANCELLED, COMPLETED]
+        rentalDetailResponses:
+          type: array
+          items:
+            $ref: '#/components/schemas/RentalDetailResponse'
+
+    RentalDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        quantity:
+          type: integer
+        amount:
+          type: number
+          format: float
+        costumeResponse:
+          $ref: '#/components/schemas/CostumeResponse'
+
+    CostumeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+
+    # ── Page/Wrapper Responses ──
+    PageResponse:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        pageSize:
+          type: integer
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 45
+
+    PageRentalOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/PageResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RentalOrderResponse'
+
+    # ── Wrapped Responses ──
+    ApiResponseAuthenticationResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Login success"
+        result:
+          $ref: '#/components/schemas/AuthenticationResponse'
+
+    ApiResponseCustomerResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          $ref: '#/components/schemas/CustomerResponse'
+
+    ApiResponseEmployeeResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          $ref: '#/components/schemas/EmployeeResponse'
+
+    ApiResponseEmployeeList:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmployeeResponse'
+
+    ApiResponsePageCustomerResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageResponse'
+            - type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CustomerResponse'
+
+    ApiResponseCustomerStatResponseList:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerStatResponse'
+
+    ApiResponseVoid:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+
+    ApiResponseError:
+      type: object
+      description: |
+        Cấu trúc phản hồi khi có lỗi xảy ra.
+        Các mã lỗi (`code`) có thể trả về:
+        - `9999`: Lỗi không xác định (Internal Server Error)
+        - `1001`: Chưa xác thực (Unauthenticated)
+        - `1002`: Không có quyền truy cập (Unauthorized)
+        - `1100`: Tên đăng nhập đã tồn tại
+        - `1101`: Người dùng/Tài khoản không tồn tại
+        - `1102`: Tên đăng nhập không hợp lệ (độ dài...)
+        - `1103`: Mật khẩu không hợp lệ (độ dài...)
+        - `1104`: Mật khẩu không chính xác
+        - `1201`: Số điện thoại đã tồn tại
+        - `1202`: Email đã tồn tại
+      properties:
+        code:
+          type: integer
+          description: Mã lỗi định nghĩa nội bộ
+          example: 1101
+        message:
+          type: string
+          description: Thông báo lỗi chi tiết
+          example: "User not existed"

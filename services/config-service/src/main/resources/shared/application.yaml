@@ -1,0 +1,31 @@
+springdoc:
+  swagger-ui:
+    enabled: true
+
+logging:
+  level:
+    org.springdoc: DEBUG
+    org.springframework.security: INFO
+    root: INFO
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9999/eureka/
+
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+jwt:
+  signerKey: ${JWT_SIGNER_KEY:5baaaf12f51417a4d22b9ec13164b852047f60fc236950d15020e715d128da8a}
+  valid-duration: ${JWT_VALID_DURATION:7} # in HOUR
+  refreshable-duration: ${JWT_REFRESHABLE_DURATION:24} # in HOUR

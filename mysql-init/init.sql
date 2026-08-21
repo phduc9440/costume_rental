@@ -1,0 +1,11 @@
+CREATE DATABASE IF NOT EXISTS costume_db;
+CREATE DATABASE IF NOT EXISTS customer_db;
+CREATE DATABASE IF NOT EXISTS rental_db;
+CREATE DATABASE IF NOT EXISTS return_db;
+CREATE DATABASE IF NOT EXISTS supplier_db;
+
+-- Payment DB is excluded as per your request
+-- CREATE DATABASE IF NOT EXISTS payment_db;
+
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
+FLUSH PRIVILEGES;

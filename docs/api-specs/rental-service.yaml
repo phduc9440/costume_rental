@@ -1,0 +1,496 @@
+# ============================================
+# Rental Service — OpenAPI 3.0 Specification
+# ============================================
+openapi: 3.0.3
+info:
+  title: Rental Service API
+  description: |
+    API quản lý đơn hàng cho thuê trang phục (Rental Orders).
+    Bao gồm: tạo đơn online/offline, quản lý trạng thái (xác nhận, đặt cọc, nhận đồ, hủy đơn).
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/rental
+    description: Via API Gateway
+  - url: http://localhost:5002
+    description: Direct access (development)
+
+paths:
+
+  # ─── Rental Order Management ────────────────
+  /rental-orders/online:
+    post:
+      tags: [Rental Order]
+      summary: Tạo đơn hàng thuê online (Khách hàng tự tạo)
+      operationId: createOnlineOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentalOrderRequest'
+      responses:
+        '200':
+          description: Tạo đơn hàng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+
+  /rental-orders/offline:
+    post:
+      tags: [Rental Order]
+      summary: Tạo đơn hàng thuê offline (Nhân viên tạo tại quầy)
+      operationId: createOfflineOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRentalOrderRequest'
+      responses:
+        '200':
+          description: Tạo đơn hàng thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+
+  /rental-orders/{orderId}:
+    get:
+      tags: [Rental Order]
+      summary: Lấy thông tin chi tiết đơn hàng theo ID
+      operationId: getOrderById
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Thông tin đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+        '404':
+          description: Không tìm thấy đơn hàng (1401)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseError'
+
+  /rental-orders/customer/{customerId}:
+    get:
+      tags: [Rental Order]
+      summary: Lấy danh sách đơn hàng của một khách hàng
+      operationId: getOrdersByCustomerId
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Danh sách đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageRentalOrderResponse'
+
+  /rental-orders:
+    get:
+      tags: [Rental Order]
+      summary: Lấy danh sách đơn hàng (Dành cho Admin/Employee)
+      operationId: getOrders
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RentalStatus'
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/RentalType'
+        - name: unpaid
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Danh sách đơn hàng
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponsePageRentalOrderResponse'
+
+  /rental-orders/{orderId}/confirm:
+    put:
+      tags: [Rental Order]
+      summary: Xác nhận đơn hàng (Staff)
+      operationId: confirmOrder
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xác nhận thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+
+  /rental-orders/{orderId}/cancel:
+    put:
+      tags: [Rental Order]
+      summary: Hủy đơn hàng
+      operationId: cancelOrder
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reason
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Hủy thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+
+  /rental-orders/{orderId}/pickup:
+    put:
+      tags: [Rental Order]
+      summary: Khách hàng đã đến nhận đồ
+      operationId: pickupOrder
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cập nhật thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+
+  /rental-orders/{orderId}/confirm-deposit:
+    put:
+      tags: [Rental Order]
+      summary: Xác nhận đã nhận tiền cọc
+      operationId: confirmDeposit
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Xác nhận thành công
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseRentalOrderResponse'
+
+  /rental-orders/internal/orders/revenue-by-customer:
+    get:
+      tags: [Internal]
+      summary: (Internal) Lấy dữ liệu thô về doanh thu theo khách hàng
+      operationId: getCustomerRevenueRawData
+      responses:
+        '200':
+          description: Dữ liệu doanh thu
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseCustomerRevenueDTOList'
+
+  # ─── Health Check ───────────────────────────
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+# ─── Components ─────────────────────────────
+components:
+  schemas:
+
+    # ── Enums ──
+    RentalStatus:
+      type: string
+      enum: [PENDING, CONFIRMED, DEPOSIT_PAID, RENTING, CANCELLED, COMPLETED]
+      description: |
+        - PENDING: Chờ xử lý (Khách hàng đặt online)
+        - CONFIRMED: Admin/Staff đã xác nhận đơn
+        - DEPOSIT_PAID: Đã nhận tiền đặt cọc
+        - RENTING: Khách hàng đang giữ đồ
+        - CANCELLED: Đơn hàng bị hủy (khách hủy hoặc admin hủy)
+        - COMPLETED: Khách đã trả đồ, đơn hàng kết thúc
+
+    RentalType:
+      type: string
+      enum: [ONLINE, OFFLINE]
+
+    # ── Request DTOs ──
+    CreateRentalOrderRequest:
+      type: object
+      properties:
+        customerId:
+          type: string
+          example: "cust-123"
+        dueDate:
+          type: string
+          format: date-time
+          description: Hạn trả đồ dự kiến
+          example: "2024-05-01T17:00:00Z"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RentalItemRequest'
+
+    RentalItemRequest:
+      type: object
+      properties:
+        costumeId:
+          type: string
+          example: "cos-456"
+        quantity:
+          type: integer
+          example: 2
+
+    # ── Response DTOs ──
+    RentalOrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "order-789"
+        deposit:
+          type: number
+          format: float
+          example: 200000.0
+        totalAmount:
+          type: number
+          format: float
+          example: 1000000.0
+        createDate:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+          description: Hạn trả đồ
+        type:
+          $ref: '#/components/schemas/RentalType'
+        status:
+          $ref: '#/components/schemas/RentalStatus'
+        cancelReason:
+          type: string
+          example: "Out of stock"
+        employeeResponse:
+          $ref: '#/components/schemas/EmployeeResponse'
+        customerResponse:
+          $ref: '#/components/schemas/CustomerResponse'
+        rentalDetailResponses:
+          type: array
+          items:
+            $ref: '#/components/schemas/RentalDetailResponse'
+
+    RentalDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "detail-1"
+        quantity:
+          type: integer
+          example: 1
+        amount:
+          type: number
+          format: float
+          example: 500000.0
+        costumeResponse:
+          $ref: '#/components/schemas/CostumeResponse'
+
+    CustomerRevenueDTO:
+      type: object
+      properties:
+        customerId:
+          type: string
+          example: "cust-123"
+        revenue:
+          type: number
+          format: float
+          example: 5000000.0
+
+    # ── Simplified/External Responses ──
+    EmployeeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        position:
+          type: string
+
+    CustomerResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+
+    CostumeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+          format: float
+
+    # ── Page/Wrapper Responses ──
+    PageResponse:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          example: 1
+        totalPages:
+          type: integer
+          example: 5
+        pageSize:
+          type: integer
+          example: 10
+        totalElements:
+          type: integer
+          format: int64
+          example: 50
+
+    ApiResponseRentalOrderResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          $ref: '#/components/schemas/RentalOrderResponse'
+
+    ApiResponsePageRentalOrderResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          allOf:
+            - $ref: '#/components/schemas/PageResponse'
+            - type: object
+              properties:
+                data:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RentalOrderResponse'
+
+    ApiResponseCustomerRevenueDTOList:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Success"
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerRevenueDTO'
+
+    ApiResponseError:
+      type: object
+      description: |
+        Cấu trúc phản hồi lỗi.
+        Các mã lỗi (`code`) có thể trả về:
+        - `9999`: Lỗi không xác định
+        - `1001`: Chưa xác thực
+        - `1002`: Không có quyền truy cập
+        - `1100`: Người dùng đã tồn tại
+        - `1101`: Người dùng không tồn tại
+        - `1201`: Số điện thoại đã tồn tại
+        - `1202`: Email đã tồn tại
+        - `1301`: Trang phục không tồn tại
+        - `1302`: Không đủ hàng trong kho
+        - `1401`: Đơn hàng không tìm thấy
+      properties:
+        code:
+          type: integer
+          example: 1401
+        message:
+          type: string
+          example: "Order not found"

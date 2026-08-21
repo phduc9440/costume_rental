@@ -1,0 +1,55 @@
+server:
+  port: ${SERVER_PORT:5001}
+  servlet:
+    context-path: /
+
+spring:
+  datasource:
+    url: ${DB_URL_CUSTOMER:jdbc:mysql://localhost:3306/customer_db?createDatabaseIfNotExist=true}
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        slidingWindowSize: 10 # Số request gần nhất dùng để thống kê lỗi
+        # VD: xét 10 request cuối cùng
+        failureRateThreshold: 50 # Ngưỡng % lỗi
+        # Nếu >= 50% request lỗi → mở CircuitBreaker
+        waitDurationInOpenState: 10s # Thời gian CircuitBreaker ở trạng thái OPEN
+        # Trong 10s này: gọi API sẽ FAIL NGAY
+        # Hết 10s → chuyển sang HALF_OPEN
+
+  retry:
+    instances:
+      default: # Retry instance mặc định
+        maxAttempts: 3 # Số lần gọi lại tối đa
+        # 1 lần gốc + 2 lần retry = 3
+        waitDuration: 1s # Thời gian chờ giữa các lần retry
+        # Mỗi lần retry cách nhau 1 giây
+
+  timelimiter:
+    configs:
+      default: # Cấu hình TimeLimiter mặc định
+        timeoutDuration: 5s # Timeout cho 1 request
+        # Nếu > 5s → timeout, coi như lỗi
+
+feign:
+  circuitbreaker:
+    enabled: true # Bật CircuitBreaker cho Feign
+    # Cho phép dùng Resilience4j với Feign
+
+  client:
+    config:
+      default: # Cấu hình Feign client mặc định
+        connect-timeout: 5000 # Timeout khi kết nối (ms)
+        # 5000ms = 5 giây
+        read-timeout: 5000 # Timeout khi đọc response (ms)
+        # Server trả lời quá 5s → timeout

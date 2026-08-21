@@ -1,0 +1,170 @@
+services:
+  # ─── Database ────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: costume_db # Mặc định tạo DB này, các DB khác tạo qua script
+    ports:
+      - "3310:3306"
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  # ─── Infrastructure ──────────────────────────────
+  config-service:
+    build:
+      context: ./services/config-service
+    ports:
+      - "${CONFIG_SERVER_PORT}:8888"
+    networks:
+      - app-network
+
+  discovery-service:
+    build:
+      context: ./services/discovery-service
+    ports:
+      - "${EUREKA_PORT}:9999"
+    environment:
+      - spring.config.import=configserver:http://config-service:8888
+    depends_on:
+      - config-service
+    networks:
+      - app-network
+
+  # ─── Core Microservices ──────────────────────────
+  customer-service:
+    build:
+      context: ./services/customer-service
+    ports:
+      - "${CUSTOMER_SERVICE_PORT}:5001"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - spring.config.import=configserver:http://config-service:8888
+      - DB_URL_CUSTOMER=${DB_URL_CUSTOMER}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SIGNER_KEY=${JWT_SIGNER_KEY}
+      - JWT_VALID_DURATION=${JWT_VALID_DURATION}
+      - JWT_REFRESHABLE_DURATION=${JWT_REFRESHABLE_DURATION}
+    depends_on:
+      - mysql
+      - config-service
+      - discovery-service
+    networks:
+      - app-network
+
+  costume-service:
+    build:
+      context: ./services/costume-service
+    ports:
+      - "${COSTUME_SERVICE_PORT}:5002"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - spring.config.import=configserver:http://config-service:8888
+      - DB_URL_COSTUME=${DB_URL_COSTUME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - mysql
+      - config-service
+      - discovery-service
+    networks:
+      - app-network
+
+  supplier-service:
+    build:
+      context: ./services/supplier-service
+    ports:
+      - "${SUPPLIER_SERVICE_PORT}:5003"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - spring.config.import=configserver:http://config-service:8888
+      - DB_URL_SUPPLIER=${DB_URL_SUPPLIER}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - mysql
+      - config-service
+      - discovery-service
+    networks:
+      - app-network
+
+  rental-service:
+    build:
+      context: ./services/rental-service
+    ports:
+      - "${RENTAL_SERVICE_PORT}:5004"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - spring.config.import=configserver:http://config-service:8888
+      - DB_URL_RENTAL=${DB_URL_RENTAL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SIGNER_KEY=${JWT_SIGNER_KEY}
+    depends_on:
+      - mysql
+      - config-service
+      - discovery-service
+    networks:
+      - app-network
+
+  return-service:
+    build:
+      context: ./services/return-service
+    ports:
+      - "${RETURN_SERVICE_PORT}:5005"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - spring.config.import=configserver:http://config-service:8888
+      - DB_URL_RETURN=${DB_URL_RETURN}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - mysql
+      - config-service
+      - discovery-service
+    networks:
+      - app-network
+
+  # ─── API Gateway ─────────────────────────────────
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "${GATEWAY_PORT}:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      - spring.config.import=configserver:http://config-service:8888
+      - JWT_SIGNER_KEY=${JWT_SIGNER_KEY}
+    depends_on:
+      - config-service
+      - discovery-service
+      - rental-service
+      - supplier-service
+      - costume-service
+      - return-service
+      - customer-service
+    networks:
+      - app-network
+
+  # ─── Frontend ────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    depends_on:
+      - gateway
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:

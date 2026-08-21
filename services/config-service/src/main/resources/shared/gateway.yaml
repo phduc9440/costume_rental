@@ -1,0 +1,51 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: false
+              # false → dùng đúng tên SERVICE-ID trong Eureka (ACCOUNT-SERVICE)
+              # true  → tự động chuyển thành lowercase
+
+          # 🔹 Route custom
+          routes:
+            - id: rental-route
+              uri: lb://rental-service
+              predicates:
+                - Path=/rental/**
+              filters:
+                - StripPrefix=1 # cắt bỏ 1 phần đầu của URL
+
+            - id: customer-route
+              uri: lb://customer-service
+              predicates:
+                - Path=/member/**
+              filters:
+                - StripPrefix=1
+
+            - id: return-route
+              uri: lb://return-service
+              predicates:
+                - Path=/return/**
+              filters:
+                - StripPrefix=1
+
+            - id: costume-route
+              uri: lb://costume-service
+              predicates:
+                - Path=/costume/**
+              filters:
+                - StripPrefix=1
+
+            - id: supplier-route
+              uri: lb://supplier-service
+              predicates:
+                - Path=/supplier/**
+              filters:
+                - StripPrefix=1
