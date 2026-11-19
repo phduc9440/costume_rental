@@ -24,7 +24,6 @@ export default function AdminCreateOfflineOrder() {
   const [costumeSearchTerm, setCostumeSearchTerm] = useState("");
   const [costumePage, setCostumePage] = useState(1);
   const [costumeTotalPages, setCostumeTotalPages] = useState(1);
-  const [selectedCostumeId, setSelectedCostumeId] = useState("");
   const [items, setItems] = useState<{ costumeId: string; name: string; quantity: number; price: number }[]>([]);
 
   // Step 3: Confirmation State
@@ -78,25 +77,6 @@ export default function AdminCreateOfflineOrder() {
     }
   };
 
-  const addItem = () => {
-    if (!selectedCostumeId) return;
-    const costume = allCostumes.find(c => c.id === selectedCostumeId);
-    if (!costume) return;
-
-    const existingIdx = items.findIndex(it => it.costumeId === selectedCostumeId);
-    if (existingIdx >= 0) {
-      setItems(prev => prev.map((it, i) => i === existingIdx ? { ...it, quantity: it.quantity + 1 } : it));
-    } else {
-      setItems(prev => [...prev, {
-        costumeId: costume.id,
-        name: costume.name,
-        quantity: 1,
-        price: costume.price
-      }]);
-    }
-    setSelectedCostumeId("");
-  };
-
   const updateQty = (idx: number, delta: number) => {
     setItems(prev => prev.map((it, i) => i === idx ? { ...it, quantity: Math.max(1, it.quantity + delta) } : it));
   };
@@ -141,7 +121,7 @@ export default function AdminCreateOfflineOrder() {
   const totalAmount = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
 
   return (
-    <div className="admin-main">
+    <div className="admin-page">
       <div className="admin-header" style={{ padding: 0, marginBottom: 30 }}>
         <h1 style={{ fontSize: "2rem" }}>Đặt hàng tại cửa hàng (Offline)</h1>
         <div className="step-indicator" style={{ display: 'flex', gap: 20 }}>
@@ -216,7 +196,7 @@ export default function AdminCreateOfflineOrder() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <h3 style={{ margin: 0 }}>Bước 2: Chọn trang phục</h3>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px 20px', borderRadius: 12, border: '1px solid var(--border-color)' }}>
+              <div style={{ background: 'var(--surface-2)', padding: '10px 20px', borderRadius: 12, border: '1px solid var(--border-color)' }}>
                 <span style={{ color: 'var(--text-muted)', marginRight: 8 }}>Đang đặt cho:</span>
                 <strong>{selectedCustomer.name}</strong> ({selectedCustomer.phone})
               </div>
@@ -254,7 +234,7 @@ export default function AdminCreateOfflineOrder() {
                           style={{ 
                             padding: '12px 16px', 
                             borderRadius: 12, 
-                            background: 'rgba(255,255,255,0.03)', 
+                            background: 'var(--surface-2)', 
                             border: '1px solid var(--border-color)',
                             display: 'flex',
                             justifyContent: 'space-between',
@@ -303,7 +283,7 @@ export default function AdminCreateOfflineOrder() {
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ 
                   flex: 1, 
-                  background: 'rgba(255,255,255,0.02)', 
+                  background: 'var(--surface-2)', 
                   borderRadius: 16, 
                   border: '1px solid var(--border-color)',
                   display: 'flex',
@@ -352,7 +332,7 @@ export default function AdminCreateOfflineOrder() {
                     </table>
                   </div>
 
-                  <div style={{ padding: 20, background: 'rgba(255,255,255,0.03)', borderRadius: '0 0 16px 16px', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ padding: 20, background: 'var(--surface-2)', borderRadius: '0 0 16px 16px', borderTop: '1px solid var(--border-color)' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ color: 'var(--text-muted)' }}>Tổng thanh toán:</span>
@@ -379,13 +359,13 @@ export default function AdminCreateOfflineOrder() {
             <h3 style={{ marginBottom: 24 }}>Bước 3: Xác nhận đơn hàng</h3>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 30 }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: 24, borderRadius: 16 }}>
+              <div style={{ background: 'var(--surface-2)', padding: 24, borderRadius: 16 }}>
                 <h4 style={{ marginBottom: 16 }}>Thông tin khách hàng</h4>
                 <p><strong>{selectedCustomer.name}</strong></p>
                 <p style={{ color: 'var(--text-muted)' }}>Phone: {selectedCustomer.phone}</p>
                 <p style={{ color: 'var(--text-muted)' }}>Email: {selectedCustomer.email}</p>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: 24, borderRadius: 16 }}>
+              <div style={{ background: 'var(--surface-2)', padding: 24, borderRadius: 16 }}>
                 <h4 style={{ marginBottom: 16 }}>Thời hạn & Thanh toán</h4>
                 <div style={{ marginBottom: 16 }}>
                   <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: 8, fontSize: '0.9rem' }}>Hạn trả (Dự kiến):</label>

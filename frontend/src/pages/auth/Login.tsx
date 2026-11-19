@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { setToken, getRoleFromToken } from '../../utils/auth';
 import { authApi } from '../../api/authApi';
+import AuthAside from '../../components/AuthAside';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -30,13 +31,13 @@ export default function Login() {
           navigate('/');
         }
       } else {
-        throw new Error('Authentication failed: No token received.');
+        throw new Error('Đăng nhập thất bại: không nhận được token.');
       }
     } catch (err: any) {
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else {
-        setError(err.message || 'Login failed. Please check your credentials.');
+        setError(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
       }
     } finally {
       setIsLoading(false);
@@ -45,12 +46,15 @@ export default function Login() {
 
   return (
     <div className="auth-container">
-      <div className="auth-card glass-panel">
-        <h2>Welcome Back</h2>
+      <AuthAside />
+      <div className="auth-main">
+      <div className="auth-card">
+        <h2>Chào mừng trở lại</h2>
+        <p className="auth-sub">Đăng nhập để tiếp tục vào tài khoản của bạn.</p>
         <form onSubmit={handleLogin}>
           {error && <div className="error-message">{error}</div>}
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">Tên đăng nhập</label>
             <input
               type="text"
               id="username"
@@ -61,7 +65,7 @@ export default function Login() {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Mật khẩu</label>
             <input
               type="password"
               id="password"
@@ -72,12 +76,13 @@ export default function Login() {
             />
           </div>
           <button type="submit" className="btn btn-primary" disabled={isLoading}>
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
         <div className="auth-links">
-          Don't have an account? <Link to="/register">Create one now</Link>
+          Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link>
         </div>
+      </div>
       </div>
     </div>
   );

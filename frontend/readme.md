@@ -2,7 +2,7 @@
 
 ## Tổng quan
 
-Giao diện chính của hệ thống Thuê Trang Phục, cung cấp trải nghiệm ứng dụng đơn trang (SPA) mượt mà cho cả Khách hàng và Quản trị viên với ngôn ngữ thiết kế Glassmorphism hiện đại.
+Giao diện chính của hệ thống Thuê Trang Phục, cung cấp trải nghiệm ứng dụng đơn trang (SPA) mượt mà cho cả Khách hàng và Quản trị viên với giao diện sáng hiện đại (sidebar tối cho trang quản trị), toàn bộ bằng tiếng Việt, tương thích mobile. Design tokens (màu, bo góc, đổ bóng) khai báo trong `src/index.css`; định dạng tiền tệ dùng chung `src/utils/format.ts`.
 
 ---
 

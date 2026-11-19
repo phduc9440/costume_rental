@@ -27,38 +27,38 @@ export default function CustomerHome() {
   if (loading)
     return (
       <div className="dashboard-container">
-        <p>Loading your experience...</p>
+        <div className="loading-spinner"></div>
       </div>
     );
 
   return (
     <div className="customer-home">
       <section className="hero-section">
-        <h1>Welcome back, {profile?.name || "Customer"}!</h1>
-        <p>Ready to find your next perfect look? Our latest collections are waiting for you.</p>
+        <h1>Xin chào, {profile?.name || "bạn"}! 👋</h1>
+        <p>Tìm bộ trang phục hoàn hảo cho sự kiện sắp tới — bộ sưu tập mới nhất đang chờ bạn.</p>
         
         <Link to="/customer/costumes" className="btn btn-primary" style={{ width: 'auto', padding: '16px 32px', fontSize: '1.1rem' }}>
-          Explore Costumes
+          Khám phá trang phục
         </Link>
       </section>
 
       <div className="quick-actions-grid">
         <Link to="/customer/costumes" className="glass-panel action-card">
           <div className="icon-box">🎭</div>
-          <h3>Browse Collection</h3>
-          <p>Explore our wide range of unique and high-quality costumes for any occasion.</p>
+          <h3>Xem bộ sưu tập</h3>
+          <p>Hàng trăm trang phục độc đáo, chất lượng cho mọi dịp.</p>
         </Link>
 
         <Link to="/customer/rentals" className="glass-panel action-card">
           <div className="icon-box">📜</div>
-          <h3>My Rentals</h3>
-          <p>Track your active rentals, view history, and manage your current orders.</p>
+          <h3>Đơn thuê của tôi</h3>
+          <p>Theo dõi đơn đang thuê, lịch sử và quản lý đơn hiện tại.</p>
         </Link>
 
         <Link to="/customer/profile" className="glass-panel action-card">
           <div className="icon-box">👤</div>
-          <h3>Account Settings</h3>
-          <p>Update your personal information and manage your contact preferences.</p>
+          <h3>Tài khoản</h3>
+          <p>Xem và cập nhật thông tin cá nhân, liên hệ.</p>
         </Link>
       </div>
     </div>

@@ -115,7 +115,7 @@ export default function AdminRevenueStatistics() {
                     <tr 
                       key={s.period} 
                       className={`mr-table-row ${selectedPeriod === s.period ? 'active' : ''}`}
-                      style={{ cursor: 'pointer', backgroundColor: selectedPeriod === s.period ? 'rgba(99, 102, 241, 0.15)' : '' }}
+                      style={{ cursor: 'pointer', backgroundColor: selectedPeriod === s.period ? 'var(--primary-soft)' : '' }}
                       onClick={() => handleRowClick(s.period)}
                     >
                       <td style={{ fontWeight: 500 }}>{formatPeriodLabel(s.period)}</td>

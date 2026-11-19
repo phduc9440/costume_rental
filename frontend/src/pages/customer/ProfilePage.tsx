@@ -17,19 +17,22 @@ export default function ProfilePage() {
   if (loading)
     return (
       <div className="dashboard-container">
-        <p>Loading profile...</p>
+        <p>Đang tải hồ sơ...</p>
       </div>
     );
 
   return (
     <div className="profile-page dashboard-container" style={{ padding: 0 }}>
       <div className="dashboard-header">
-        <h2>My Profile</h2>
+        <div>
+          <h2 className="page-title">Hồ sơ của tôi</h2>
+          <p className="page-sub">Thông tin liên hệ dùng cho các đơn thuê.</p>
+        </div>
       </div>
 
       <div className="glass-panel stat-card" style={{ maxWidth: "600px" }}>
         <div className="form-group">
-          <label>Full Name</label>
+          <label>Họ và tên</label>
           <input
             className="form-control"
             value={profile?.name || ""}
@@ -37,7 +40,7 @@ export default function ProfilePage() {
           />
         </div>
         <div className="form-group">
-          <label>Username</label>
+          <label>Tên đăng nhập</label>
           <input
             className="form-control"
             value={profile?.username || ""}
@@ -53,7 +56,7 @@ export default function ProfilePage() {
           />
         </div>
         <div className="form-group">
-          <label>Phone</label>
+          <label>Số điện thoại</label>
           <input
             className="form-control"
             value={profile?.phone || ""}
@@ -61,7 +64,7 @@ export default function ProfilePage() {
           />
         </div>
         <div className="form-group">
-          <label>Address</label>
+          <label>Địa chỉ</label>
           <textarea
             className="form-control"
             value={profile?.address || ""}
@@ -72,7 +75,7 @@ export default function ProfilePage() {
         </div>
 
         <button className="btn btn-primary" style={{ marginTop: "16px" }}>
-          Edit Profile
+          Chỉnh sửa hồ sơ
         </button>
       </div>
     </div>

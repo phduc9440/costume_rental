@@ -274,7 +274,7 @@ function EditSection({
       }}>
         {/* Left: Costume Discovery */}
         <div className="rd-discovery-card" style={{ 
-          background: 'rgba(255,255,255,0.03)', 
+          background: 'var(--surface-2)', 
           borderRadius: 20, 
           padding: 20, 
           border: '1px solid var(--border-color)',
@@ -287,7 +287,7 @@ function EditSection({
              <input 
                className="form-control" 
                placeholder="Tìm thêm trang phục..." 
-               style={{ paddingLeft: 40, background: 'rgba(255,255,255,0.05)', borderRadius: 12 }}
+               style={{ paddingLeft: 40, background: 'var(--surface-2)', borderRadius: 12 }}
                value={costumeSearchTerm}
                onChange={(e) => { setCostumeSearchTerm(e.target.value); setCostumePage(1); }}
              />
@@ -300,7 +300,7 @@ function EditSection({
                   <div key={c.id} style={{ 
                     padding: 14, 
                     borderRadius: 16, 
-                    background: 'rgba(255,255,255,0.03)', 
+                    background: 'var(--surface-2)', 
                     border: '1px solid var(--border-color)',
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -341,7 +341,7 @@ function EditSection({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ 
             flex: 1,
-            background: 'rgba(255,255,255,0.05)', 
+            background: 'var(--surface-2)', 
             borderRadius: 20, 
             border: '1px solid var(--border-color)',
             display: 'flex',
@@ -360,7 +360,7 @@ function EditSection({
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between',
-                  borderBottom: '1px solid rgba(255,255,255,0.03)'
+                  borderBottom: '1px solid var(--surface-2)'
                 }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 500, fontSize: '0.9rem' }}>{item.name}</div>
@@ -381,7 +381,7 @@ function EditSection({
               )}
             </div>
 
-            <div style={{ padding: 20, background: 'rgba(255,255,255,0.03)', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ padding: 20, background: 'var(--surface-2)', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ opacity: 0.7 }}>Tổng mới (tạm tính):</span>
                 <strong style={{ fontSize: '1.1rem' }}>{totalPreview.toLocaleString()}đ</strong>

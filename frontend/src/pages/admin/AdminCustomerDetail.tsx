@@ -53,12 +53,12 @@ export default function AdminCustomerDetail() {
   }, [fetchCustomer]);
 
   if (loading && !customer) {
-    return <div className="admin-main"><div className="loading-spinner" /></div>;
+    return <div className="admin-page"><div className="loading-spinner" /></div>;
   }
 
   if (error || !customer) {
     return (
-      <div className="admin-main">
+      <div className="admin-page">
         <div className="glass-panel admin-card" style={{ textAlign: "center", padding: 60 }}>
           <p style={{ color: "var(--error-color)" }}>{error ?? "Khách hàng không tồn tại."}</p>
           <button className="btn outline" style={{ marginTop: 16, width: "auto" }} onClick={() => navigate("/admin/customers")}>Quay lại danh sách</button>
@@ -70,7 +70,7 @@ export default function AdminCustomerDetail() {
   const rentalHistory = customer.rentalHistory;
 
   return (
-    <div className="admin-main">
+    <div className="admin-page">
       <div className="admin-header" style={{ padding: 0, marginBottom: 24 }}>
         <div>
           <button 
@@ -157,11 +157,11 @@ export default function AdminCustomerDetail() {
           <div className="glass-panel admin-card">
             <h3 style={{ marginBottom: 16 }}>📊 Thống kê nhanh</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 12, border: '1px solid var(--border-color)' }}>
+              <div style={{ background: 'var(--surface-2)', padding: 16, borderRadius: 12, border: '1px solid var(--border-color)' }}>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Tổng số đơn hàng</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4 }}>{rentalHistory?.totalElements || 0}</div>
               </div>
-              <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 12, border: '1px solid var(--border-color)' }}>
+              <div style={{ background: 'var(--surface-2)', padding: 16, borderRadius: 12, border: '1px solid var(--border-color)' }}>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Tổng chi tiêu</span>
                 <div style={{ fontSize: '1.8rem', fontWeight: 700, marginTop: 4, color: 'var(--success-color)' }}>
                   {(customer.totalSpent || 0).toLocaleString()}đ

@@ -12,7 +12,7 @@ export default function AdminCostumeList() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCostume, setEditingCostume] = useState<Costume | null>(null);
-  const [formData, setFormData] = useState<Partial<Costume>>({ name: '', price: 0, description: '' });
+  const [formData, setFormData] = useState<Partial<Costume>>({ name: '', price: 0 });
   const [message, setMessage] = useState({ text: '', type: '' });
 
   useEffect(() => {
@@ -42,13 +42,13 @@ export default function AdminCostumeList() {
 
   const openAddModal = () => {
     setEditingCostume(null);
-    setFormData({ name: '', price: 0, description: '' });
+    setFormData({ name: '', price: 0 });
     setIsModalOpen(true);
   };
 
   const openEditModal = (costume: Costume) => {
     setEditingCostume(costume);
-    setFormData({ name: costume.name, price: costume.price, description: costume.description });
+    setFormData({ name: costume.name, price: costume.price });
     setIsModalOpen(true);
   };
 
@@ -139,7 +139,7 @@ export default function AdminCostumeList() {
                   <tr key={costume.id} className="mr-table-row">
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                        <div style={{ width: '40px', height: '40px', background: 'var(--surface-2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
                           🎭
                         </div>
                         <strong style={{ fontWeight: 500 }}>{costume.name}</strong>
@@ -221,17 +221,6 @@ export default function AdminCostumeList() {
                   min="0"
                   value={formData.price}
                   onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
-                />
-              </div>
-              <div className="form-group">
-                <label>Mô tả ngắn</label>
-                <textarea 
-                  className="form-control" 
-                  required 
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Mô tả..."
                 />
               </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>

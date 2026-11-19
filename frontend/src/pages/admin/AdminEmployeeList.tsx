@@ -26,7 +26,7 @@ export default function AdminEmployeeList() {
         setEmployees(response.data.result);
       }
     } catch (err) {
-      setError('Failed to fetch employees');
+      setError('Không tải được danh sách nhân viên');
     } finally {
       setLoading(false);
     }
@@ -40,35 +40,40 @@ export default function AdminEmployeeList() {
       setNewEmployee({ username: '', password: '', position: '' });
       fetchEmployees();
     } catch (err) {
-      alert('Failed to create employee');
+      alert('Tạo nhân viên thất bại');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Delete this employee account?')) return;
+    if (!window.confirm('Xóa tài khoản nhân viên này?')) return;
     try {
       await employeeApi.deleteEmployee(id);
       fetchEmployees();
     } catch (err) {
-      alert('Failed to delete employee');
+      alert('Xóa nhân viên thất bại');
     }
   };
 
   return (
     <div className="admin-employee-list">
-      <div className="dashboard-header" style={{ border: 'none', padding: 0 }}>
-        <h2>Manage Staff</h2>
+      <div className="dashboard-header">
+        <div>
+          <h2>Quản lý nhân viên</h2>
+          <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>Tạo và quản lý tài khoản nhân viên cửa hàng.</p>
+        </div>
         <button onClick={() => setIsAdding(!isAdding)} className="btn btn-primary" style={{ width: 'auto' }}>
-          {isAdding ? 'Cancel' : 'Add New Employee'}
+          {isAdding ? 'Hủy' : '+ Thêm nhân viên'}
         </button>
       </div>
 
+      {error && <div className="error-message">{error}</div>}
+
       {isAdding && (
         <div className="glass-panel admin-card" style={{ marginBottom: '30px' }}>
-          <h3>New Employee Account</h3>
+          <h3>Tài khoản nhân viên mới</h3>
           <form onSubmit={handleCreate} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '15px', alignItems: 'end', marginTop: '20px' }}>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Username</label>
+              <label>Tên đăng nhập</label>
               <input 
                 type="text" 
                 className="form-control" 
@@ -78,7 +83,7 @@ export default function AdminEmployeeList() {
               />
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Password</label>
+              <label>Mật khẩu</label>
               <input 
                 type="password" 
                 className="form-control" 
@@ -88,17 +93,17 @@ export default function AdminEmployeeList() {
               />
             </div>
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label>Position</label>
+              <label>Chức vụ</label>
               <input 
                 type="text" 
                 className="form-control" 
                 required 
-                placeholder="e.g. Sales, Stock Manager"
+                placeholder="VD: Bán hàng, Quản lý kho"
                 value={newEmployee.position}
                 onChange={e => setNewEmployee({...newEmployee, position: e.target.value})}
               />
             </div>
-            <button type="submit" className="btn btn-primary" style={{ height: '45px' }}>Create Account</button>
+            <button type="submit" className="btn btn-primary" style={{ height: '45px' }}>Tạo tài khoản</button>
           </form>
         </div>
       )}
@@ -110,10 +115,10 @@ export default function AdminEmployeeList() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Position</th>
-                <th>Actions</th>
+                <th>Tên đăng nhập</th>
+                <th>Vai trò</th>
+                <th>Chức vụ</th>
+                <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -128,7 +133,7 @@ export default function AdminEmployeeList() {
                       style={{ color: 'var(--error-color)', width: 'auto', padding: '6px 15px' }}
                       onClick={() => handleDelete(emp.id)}
                     >
-                      Remove
+                      Xóa
                     </button>
                   </td>
                 </tr>

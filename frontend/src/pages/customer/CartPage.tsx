@@ -3,6 +3,7 @@ import { useCart } from "../../context/CartContext";
 import { rentalApi } from "../../api/rentalApi";
 import { getUserIdFromToken } from "../../utils/auth";
 import { useState } from "react";
+import { formatVND } from "../../utils/format";
 
 export default function CartPage() {
   const { items, totalAmount, updateQuantity, removeFromCart, clearCart } = useCart();
@@ -18,12 +19,12 @@ export default function CartPage() {
   const handleCheckout = async () => {
     const userId = getUserIdFromToken();
     if (!userId) {
-      setError("Please login to complete your rental.");
+      setError("Vui lòng đăng nhập để hoàn tất đơn thuê.");
       return;
     }
 
     if (items.length === 0) {
-      setError("Your cart is empty.");
+      setError("Giỏ hàng đang trống.");
       return;
     }
 
@@ -45,7 +46,7 @@ export default function CartPage() {
       navigate("/customer/rentals");
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.message || "Failed to create rental order. Please try again.");
+      setError(err.response?.data?.message || "Không thể tạo đơn thuê. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -53,70 +54,71 @@ export default function CartPage() {
 
   return (
     <div className="cart-page">
-      <div className="dashboard-header" style={{ marginBottom: '32px' }}>
-        <h2>Shopping Cart</h2>
+      <div className="dashboard-header">
+        <div>
+          <h2 className="page-title">Giỏ hàng</h2>
+          <p className="page-sub">Kiểm tra trang phục và chọn ngày trả trước khi xác nhận.</p>
+        </div>
       </div>
 
       {items.length === 0 ? (
-        <div className="glass-panel stat-card" style={{ textAlign: 'center', padding: '60px' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🛒</div>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
-            Your cart is feeling a bit lonely.
-          </p>
+        <div className="glass-panel empty-state">
+          <div className="empty-icon">🛒</div>
+          <p>Giỏ hàng của bạn đang trống.</p>
           <button className="btn btn-primary" onClick={() => navigate('/customer/costumes')} style={{ width: 'auto', padding: '12px 30px' }}>
-            Browse Costumes
+            Xem trang phục
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '30px', alignItems: 'start' }}>
+        <div className="cart-layout">
           <div className="cart-items-list">
             {items.map((item) => (
-              <div key={item.costume.id} className="glass-panel cart-item-card" style={{ display: 'flex', padding: '20px', marginBottom: '20px', alignItems: 'center' }}>
-                <div style={{ fontSize: '2.5rem', marginRight: '24px', background: '#f1f5f9', width: '80px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>
+              <div key={item.costume.id} className="glass-panel cart-item-card" style={{ display: 'flex', padding: '16px 20px', marginBottom: '14px', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                <div style={{ fontSize: '2.5rem', background: 'linear-gradient(135deg, #efe9ff, #fbe7f3)', width: '72px', height: '72px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px' }}>
                   🎭
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '4px' }}>{item.costume.name}</h3>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: '600' }}>${item.costume.price} / day</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: '600' }}>{formatVND(item.costume.price)} / ngày</p>
                 </div>
-                <div className="quantity-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '0 40px' }}>
-                  <button 
-                    className="btn-icon" 
+                <div className="rd-qty-control">
+                  <button
+                    className="rd-qty-btn"
                     onClick={() => updateQuantity(item.costume.id, item.quantity - 1)}
-                    style={{ background: '#f1f5f9', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer' }}
+                    aria-label="Giảm số lượng"
                   >
-                    -
+                    −
                   </button>
-                  <span style={{ minWidth: '20px', textAlign: 'center', fontWeight: 'bold' }}>{item.quantity}</span>
-                  <button 
-                    className="btn-icon" 
+                  <span className="rd-qty-value">{item.quantity}</span>
+                  <button
+                    className="rd-qty-btn"
                     onClick={() => updateQuantity(item.costume.id, item.quantity + 1)}
-                    style={{ background: '#f1f5f9', border: 'none', width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer' }}
+                    aria-label="Tăng số lượng"
                   >
                     +
                   </button>
                 </div>
                 <div style={{ textAlign: 'right', minWidth: '100px' }}>
-                  <p style={{ fontWeight: '700', fontSize: '1.1rem' }}>${item.costume.price * item.quantity}</p>
+                  <p style={{ fontWeight: '700', fontSize: '1.1rem' }}>{formatVND(item.costume.price * item.quantity)}</p>
                   <button 
                     onClick={() => removeFromCart(item.costume.id)}
                     style={{ color: 'var(--error-color)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', marginTop: '4px' }}
                   >
-                    Remove
+                    Xóa
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="glass-panel order-summary" style={{ padding: '30px', position: 'sticky', top: '100px' }}>
-            <h3 style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' }}>Order Summary</h3>
+          <div className="glass-panel order-summary" style={{ padding: '30px', position: 'sticky', top: '92px' }}>
+            <h3 style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)' }}>Tóm tắt đơn hàng</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <span style={{ color: 'var(--text-muted)' }}>Items ({items.length})</span>
-              <span>${totalAmount}</span>
+              <span style={{ color: 'var(--text-muted)' }}>Trang phục ({items.length})</span>
+              <span>{formatVND(totalAmount)}</span>
             </div>
             <div style={{ marginBottom: '24px', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-              <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem' }}>Return Date (Hạn trả):</label>
+              <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem' }}>Ngày trả dự kiến</label>
               <input 
                 type="date" 
                 className="form-control" 
@@ -124,7 +126,7 @@ export default function CartPage() {
                 min={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setDueDate(e.target.value)}
                 style={{ 
-                  background: 'rgba(255,255,255,0.05)', 
+                  background: 'var(--surface-2)', 
                   border: '1px solid var(--border-color)',
                   color: 'var(--text-color)',
                   padding: '8px 12px',
@@ -134,8 +136,8 @@ export default function CartPage() {
               />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '32px', fontSize: '1.25rem', fontWeight: '700' }}>
-              <span>Total</span>
-              <span style={{ color: 'var(--primary-color)' }}>${totalAmount}</span>
+              <span>Tổng cộng</span>
+              <span style={{ color: 'var(--primary-color)' }}>{formatVND(totalAmount)}</span>
             </div>
             
             {error && <p style={{ color: 'var(--error-color)', fontSize: '0.9rem', marginBottom: '16px' }}>{error}</p>}
@@ -146,10 +148,10 @@ export default function CartPage() {
               disabled={loading}
               style={{ width: '100%', padding: '15px' }}
             >
-              {loading ? 'Processing...' : 'Confirm Rental'}
+              {loading ? 'Đang xử lý...' : 'Xác nhận thuê'}
             </button>
             <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              By confirming, you agree to our Terms of Service
+              Bằng việc xác nhận, bạn đồng ý với điều khoản thuê của cửa hàng.
             </p>
           </div>
         </div>

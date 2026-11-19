@@ -4,9 +4,9 @@ import { rentalApi } from '../../api/rentalApi';
 import { returnApi } from '../../api/returnApi';
 import { errorApi } from '../../api/errorApi';
 import type { Customer } from '../../types/customer';
-import type { RentalOrder, RentalItem } from '../../types/rental';
+import type { RentalOrder } from '../../types/rental';
 import type { ErrorPenalty } from '../../types/error';
-import type { ReturnRequest, ReturnItemRequest } from '../../types/return';
+import type { ReturnRequest } from '../../types/return';
 import './AdminLayout.css';
 
 export default function AdminReturnProcessing() {
@@ -285,7 +285,7 @@ export default function AdminReturnProcessing() {
           ) : (
             <div className="rental-details">
                <div className="glass-panel" style={{ marginBottom: '24px', overflow: 'hidden' }}>
-                 <div style={{ padding: '16px 20px', background: 'rgba(99, 102, 241, 0.1)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
+                 <div style={{ padding: '16px 20px', background: 'var(--primary-soft)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
                     <h3 style={{ fontSize: '1.1rem' }}>Chi tiết phiếu mượn #{selectedRental.id.substring(0, 10)}</h3>
                     <button className="btn outline" style={{ width: 'auto', padding: '4px 12px', fontSize: '0.8rem' }} onClick={() => setSelectedRental(null)}>Quay lại</button>
                  </div>
@@ -306,7 +306,7 @@ export default function AdminReturnProcessing() {
                       {selectedRental.rentalDetailResponses.map(item => {
                         const status = returnItems[item.id] || {};
                         return (
-                          <tr key={item.id} className={`mr-table-row ${status.selected ? 'active' : ''}`} style={{ backgroundColor: status.selected ? 'rgba(99, 102, 241, 0.05)' : '' }}>
+                          <tr key={item.id} className={`mr-table-row ${status.selected ? 'active' : ''}`} style={{ backgroundColor: status.selected ? 'var(--primary-soft)' : '' }}>
                             <td>
                               <input 
                                 type="checkbox" 
@@ -389,7 +389,7 @@ export default function AdminReturnProcessing() {
               <p style={{ color: 'var(--text-muted)' }}>Mã hóa đơn: #RT-{Math.random().toString(36).substr(2, 9).toUpperCase()}</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '40px', padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '40px', padding: '20px', background: 'var(--surface-2)', borderRadius: '12px' }}>
               <div>
                 <h4 style={{ color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.8rem', textTransform: 'uppercase' }}>Khách hàng</h4>
                 <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>{selectedCustomer.name}</p>
@@ -436,7 +436,7 @@ export default function AdminReturnProcessing() {
               </tbody>
             </table>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '24px', background: 'rgba(99, 102, 241, 0.05)', borderRadius: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '24px', background: 'var(--primary-soft)', borderRadius: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>Tổng tiền mượn:</span>
                 <span style={{ fontWeight: 600 }}>{calculateTotals().totalRentalFee.toLocaleString()} đ</span>

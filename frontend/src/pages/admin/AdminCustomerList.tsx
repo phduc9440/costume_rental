@@ -43,14 +43,14 @@ export default function AdminCustomerList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this customer?"))
+    if (!window.confirm("Bạn có chắc muốn xóa khách hàng này?"))
       return;
 
     try {
       await customerApi.deleteCustomer(id);
       fetchCustomers();
     } catch (err) {
-      alert("Failed to delete customer");
+      alert("Xóa khách hàng thất bại");
     }
   };
 
@@ -61,7 +61,7 @@ export default function AdminCustomerList() {
           <input
             type="text"
             className="form-control search-input"
-            placeholder="Search by phone number..."
+            placeholder="Tìm theo số điện thoại..."
             value={searchPhone}
             onChange={(e) => setSearchPhone(e.target.value)}
           />
@@ -104,12 +104,12 @@ export default function AdminCustomerList() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Username</th>
-                  <th>Phone</th>
+                  <th>Họ tên</th>
+                  <th>Tên đăng nhập</th>
+                  <th>Số điện thoại</th>
                   <th>Email</th>
-                  <th>Address</th>
-                  <th>Actions</th>
+                  <th>Địa chỉ</th>
+                  <th>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
@@ -164,7 +164,7 @@ export default function AdminCustomerList() {
                         color: "var(--text-muted)",
                       }}
                     >
-                      No customers found.
+                      Không tìm thấy khách hàng.
                     </td>
                   </tr>
                 )}

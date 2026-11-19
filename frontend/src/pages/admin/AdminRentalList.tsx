@@ -4,6 +4,15 @@ import type { RentalOrder, RentalStatus } from "../../types/rental";
 import "./AdminLayout.css";
 import { Link, useNavigate } from "react-router-dom";
 
+const STATUS_META: Record<RentalStatus, { label: string; cls: string }> = {
+  PENDING: { label: "Chờ xác nhận", cls: "warning" },
+  CONFIRMED: { label: "Đã xác nhận", cls: "info" },
+  DEPOSIT_PAID: { label: "Đã đặt cọc", cls: "info" },
+  RENTING: { label: "Đang thuê", cls: "success" },
+  CANCELLED: { label: "Đã hủy", cls: "danger" },
+  COMPLETED: { label: "Hoàn thành", cls: "success" },
+};
+
 export default function AdminRentalList() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState<RentalOrder[]>([]);
@@ -68,29 +77,22 @@ export default function AdminRentalList() {
       }
       fetchOrders();
     } catch (err) {
-      alert("Action failed");
+      alert("Thao tác thất bại");
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadgeClass = (status: RentalStatus) => {
-    switch (status) {
-      case "COMPLETED":
-        return "badge success";
-      case "CANCELLED":
-        return "badge danger";
-      case "PENDING":
-        return "badge warning";
-      default:
-        return "badge";
-    }
-  };
+  const getStatusBadgeClass = (status: RentalStatus) =>
+    `badge ${STATUS_META[status]?.cls ?? ""}`;
 
   return (
     <div className="admin-rental-list">
-      <div className="glass-panel admin-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h2 style={{ margin: 0 }}>Rental Orders</h2>
+      <div className="dashboard-header">
+        <div>
+          <h2>Danh sách đơn thuê</h2>
+          <p style={{ color: 'var(--text-muted)', marginTop: 4 }}>Xác nhận, giao đồ và theo dõi trạng thái đơn.</p>
+        </div>
         <button 
           className="btn btn-primary" 
           style={{ width: 'auto' }}
@@ -111,7 +113,7 @@ export default function AdminRentalList() {
             <option value="">Tất cả trạng thái</option>
             {statuses.map((s) => (
               <option key={s} value={s}>
-                {s}
+                {STATUS_META[s as RentalStatus]?.label ?? s}
               </option>
             ))}
           </select>
@@ -134,8 +136,8 @@ export default function AdminRentalList() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Order ID</th>
-                  <th>Customer</th>
+                  <th>Mã đơn</th>
+                  <th>Khách hàng</th>
                   <th>Ngày tạo</th>
                   <th>Hạn trả</th>
                   <th style={{ textAlign: 'right' }}>Tổng tiền</th>
@@ -172,7 +174,7 @@ export default function AdminRentalList() {
                      <td style={{ textAlign: "right", fontWeight: 600, color: 'var(--primary-color)' }}>{order.deposit.toLocaleString()}đ</td>
                     <td>
                       <span className={getStatusBadgeClass(order.status)}>
-                        {order.status}
+                        {STATUS_META[order.status]?.label ?? order.status}
                       </span>
                     </td>
                     <td>

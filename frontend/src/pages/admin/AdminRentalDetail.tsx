@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { rentalApi } from "../../api/rentalApi";
 import { costumeApi } from "../../api/costumeApi";
-import type { RentalOrder, RentalStatus, RentalItem } from "../../types/rental";
+import type { RentalOrder, RentalStatus } from "../../types/rental";
 import type { Costume } from "../../types/costume";
 import "./AdminLayout.css";
 
@@ -165,7 +165,7 @@ function AdminEditSection({
                     style={{ 
                       padding: '14px 18px', 
                       borderRadius: 14, 
-                      background: 'rgba(255,255,255,0.04)', 
+                      background: 'var(--surface-2)', 
                       border: '1px solid var(--border-color)',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -213,14 +213,14 @@ function AdminEditSection({
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
           <div style={{ 
             flex: 1, 
-            background: 'rgba(255,255,255,0.02)', 
+            background: 'var(--surface-2)', 
             borderRadius: 16, 
             border: '1px solid var(--border-color)',
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden'
           }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
                 Danh sách chỉnh sửa
               </h4>
@@ -264,13 +264,13 @@ function AdminEditSection({
               </table>
             </div>
 
-            <div style={{ padding: 24, background: 'rgba(255,255,255,0.03)', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ padding: 24, background: 'var(--surface-2)', borderTop: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Tổng thanh toán:</span>
                   <strong style={{ fontSize: '1.25rem' }}>{totalPreview.toLocaleString()}đ</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: 10, borderTop: '1px dashed var(--border-color)' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Tiền đặt cọc (50%):</span>
                   <strong style={{ fontSize: '1.4rem', color: 'var(--primary-color)' }}>{(totalPreview * 0.5).toLocaleString()}đ</strong>
                 </div>
@@ -347,12 +347,12 @@ export default function AdminRentalDetail() {
   const canEdit = order?.status === "PENDING" || order?.status === "CONFIRMED";
 
   if (loading && !order) {
-    return <div className="admin-main"><div className="loading-spinner" /></div>;
+    return <div className="admin-page"><div className="loading-spinner" /></div>;
   }
 
   if (error || !order) {
     return (
-      <div className="admin-main">
+      <div className="admin-page">
         <div className="glass-panel admin-card" style={{ textAlign: "center", padding: 60 }}>
           <p style={{ color: "var(--error-color)" }}>{error ?? "Đơn hàng không tồn tại."}</p>
           <button className="btn outline" style={{ marginTop: 16, width: "auto" }} onClick={() => navigate("/admin/rentals")}>Quay lại danh sách</button>
@@ -362,7 +362,7 @@ export default function AdminRentalDetail() {
   }
 
   return (
-    <div className="admin-main">
+    <div className="admin-page">
       <div className="admin-header" style={{ padding: 0, marginBottom: 24 }}>
         <div>
           <button className="btn outline" style={{ width: "auto", marginBottom: 12, padding: "4px 12px" }} onClick={() => navigate("/admin/rentals")}>Quay lại danh sách</button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supplierApi } from '../../api/supplierApi';
-import type { Supplier, SupplierCreationRequest, SupplierUpdateRequest } from '../../types/supplier';
+import type { Supplier, SupplierCreationRequest } from '../../types/supplier';
 import './AdminLayout.css';
 
 export default function AdminSupplierList() {
@@ -146,7 +146,7 @@ export default function AdminSupplierList() {
                   <tr key={supplier.id} className="mr-table-row">
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                        <div style={{ width: '40px', height: '40px', background: 'var(--surface-2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
                           🏭
                         </div>
                         <strong style={{ fontWeight: 500 }}>{supplier.name}</strong>
